@@ -34,7 +34,7 @@ class PhotoDeserializer : JsonDeserializer<PhotoResponse> {
                 val galleryItemTitle:String = jsonObjectPhoto[element].asJsonObject.get("title").toString()
 
                 val galleryItemId:String = jsonObjectPhoto[element].asJsonObject.get("id").toString()
-                val galleryItemUrl:String = jsonObjectPhoto[element].asJsonObject.get("url_s").toString()
+                val galleryItemUrl:String = jsonObjectPhoto[element].asJsonObject.get("url_s").toString().replace("\"","")
                // Log.d(TAG,"galleryTitle[$element]: $galleryItemTitle, galleryId[$element]: $galleryItemId, galleryURL[$element]: $galleryItemUrl")
                 listItems += GalleryItem(galleryItemTitle,galleryItemId,galleryItemUrl)
             }

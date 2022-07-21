@@ -65,12 +65,12 @@ class FlickrFetchr {
 
     @WorkerThread
     fun fetchPhoto(url: String): Bitmap? {
-        val newUrl: String = url.replace("\"","")
-        val response: Response<ResponseBody> = flickrApi.fetchUrlBytes(newUrl).execute()
+
+        val response: Response<ResponseBody> = flickrApi.fetchUrlBytes(url).execute()
         val bitmap = response.body()?.byteStream()?.use(BitmapFactory::decodeStream)
 
         Log.i(TAG, "Response.body=$response ")
-        Log.i(TAG, "URK=$newUrl")
+
         Log.i(TAG, "Decoded bitmap=$bitmap from Response=${response.body()}")
 
         return bitmap
