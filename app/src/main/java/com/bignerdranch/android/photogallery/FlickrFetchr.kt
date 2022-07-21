@@ -1,11 +1,17 @@
-package com.bignerdranch.android.photogallery.api
+package com.bignerdranch.android.photogallery
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.util.Log
+import androidx.annotation.WorkerThread
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.bignerdranch.android.photogallery.GalleryItem
 import com.bignerdranch.android.photogallery.PhotoDeserializer
+import com.bignerdranch.android.photogallery.api.FlickrApi
+import com.bignerdranch.android.photogallery.api.PhotoResponse
 import com.google.gson.GsonBuilder
+import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -39,13 +45,13 @@ class FlickrFetchr {
                 call: Call<PhotoResponse>,
                 response: Response<PhotoResponse>
             ) {
-               // Log.d(TAG, "Response received")
+                // Log.d(TAG, "Response received")
                 val photoResponse: PhotoResponse? = response.body()
                 photoResponse?.galleryItems = response.body()?.galleryItems!!
                 var galleryItems: List<GalleryItem> = photoResponse?.galleryItems ?: mutableListOf()
                 galleryItems = galleryItems.filterNot { it.url.isBlank() }
 
-               // Log.d(TAG, "GallaryItems = $galleryItems")
+                // Log.d(TAG, "GallaryItems = $galleryItems")
 
                 responseLiveData.value = galleryItems
             }
@@ -55,6 +61,19 @@ class FlickrFetchr {
             }
         })
         return responseLiveData
+    }
+
+    @WorkerThread
+    fun fetchPhoto(url: String): Bitmap? {
+        val newUrl: String = url.replace("\"","")
+        val response: Response<ResponseBody> = flickrApi.fetchUrlBytes(newUrl).execute()
+        val bitmap = response.body()?.byteStream()?.use(BitmapFactory::decodeStream)
+
+        Log.i(TAG, "Response.body=$response ")
+        Log.i(TAG, "URK=$newUrl")
+        Log.i(TAG, "Decoded bitmap=$bitmap from Response=${response.body()}")
+
+        return bitmap
     }
 
 }
