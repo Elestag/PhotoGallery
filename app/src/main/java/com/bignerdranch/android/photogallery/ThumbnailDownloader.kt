@@ -6,6 +6,7 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.os.Message
 import android.util.Log
+import android.util.LruCache
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
@@ -51,6 +52,7 @@ class ThumbnailDownloader<in T : Any>(
     private lateinit var requestHandler: Handler
     private val requestMap = ConcurrentHashMap<T, String>()
     private val flickrFetchr = FlickrFetchr()
+    private val lruCache = LruCache<String, Bitmap>(50)
 
 
     @Suppress("UNCHECKED_CAST")
@@ -60,7 +62,7 @@ class ThumbnailDownloader<in T : Any>(
             override fun handleMessage(msg: Message) {
                 if (msg.what == MESSAGE_DOWNLOAD) {
                     val target = msg.obj as T
-                   // Log.i(TAG, "Got a request for URL: ${requestMap[target]}")
+                    // Log.i(TAG, "Got a request for URL: ${requestMap[target]}")
 
                     handleRequest(target)
                 }
@@ -74,7 +76,7 @@ class ThumbnailDownloader<in T : Any>(
     }
 
     fun queueThumbnail(target: T, url: String) {
-       // Log.i(TAG, "Got a URL: $url")
+        // Log.i(TAG, "Got a URL: $url")
         requestMap[target] = url
         requestHandler.obtainMessage(MESSAGE_DOWNLOAD, target)
             .sendToTarget()
@@ -87,9 +89,17 @@ class ThumbnailDownloader<in T : Any>(
 
     private fun handleRequest(target: T) {
         val url = requestMap[target] ?: return
-        Log.i(TAG, "url in handleRequest: $url")
-        val bitmap = flickrFetchr.fetchPhoto(url) ?: return
-        Log.i(TAG, "bitmap: $bitmap")
+        Log.i(TAG, "requestMap[target]: $url")
+        val bitmap: Bitmap
+        if (lruCache.get(url) != null) {
+            bitmap = lruCache.get(url)
+        } else {
+            bitmap = flickrFetchr.fetchPhoto(url) ?: return
+            lruCache.put(url, bitmap)
+        }
+        // Log.i(TAG, "url in handleRequest: $url")
+        // Log.i(TAG, "bitmap: $bitmap")
+
         responseHandler.post(Runnable {
             if (requestMap[target] != url || hasQuit) {
                 return@Runnable
