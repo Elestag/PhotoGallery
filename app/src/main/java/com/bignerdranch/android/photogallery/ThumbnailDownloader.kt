@@ -62,7 +62,7 @@ class ThumbnailDownloader<in T : Any>(
             override fun handleMessage(msg: Message) {
                 if (msg.what == MESSAGE_DOWNLOAD) {
                     val target = msg.obj as T
-                    // Log.i(TAG, "Got a request for URL: ${requestMap[target]}")
+                    //  Log.i(TAG, "Got a request for URL: ${requestMap[target]}")
 
                     handleRequest(target)
                 }
@@ -89,16 +89,17 @@ class ThumbnailDownloader<in T : Any>(
 
     private fun handleRequest(target: T) {
         val url = requestMap[target] ?: return
-        Log.i(TAG, "requestMap[target]: $url")
+            //Log.i(TAG, "requestMap[target]: $url")
         val bitmap: Bitmap
         if (lruCache.get(url) != null) {
             bitmap = lruCache.get(url)
+            Log.i(TAG, "url in lru: $url")
         } else {
             bitmap = flickrFetchr.fetchPhoto(url) ?: return
             lruCache.put(url, bitmap)
         }
-        // Log.i(TAG, "url in handleRequest: $url")
-        // Log.i(TAG, "bitmap: $bitmap")
+
+        Log.i(TAG, "bitmap: $bitmap")
 
         responseHandler.post(Runnable {
             if (requestMap[target] != url || hasQuit) {

@@ -8,7 +8,7 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import java.lang.reflect.Type
 
-private const val TAG = "FlickrFetchr"
+private const val TAG = "Deserializer"
 
 class PhotoDeserializer : JsonDeserializer<PhotoResponse> {
     override fun deserialize(
@@ -19,13 +19,13 @@ class PhotoDeserializer : JsonDeserializer<PhotoResponse> {
 
         val jsonObject: JsonObject? = json?.asJsonObject
 
-       // Log.d(TAG,"JsonObject: $jsonObject")
+        Log.d(TAG,"JsonObject: $jsonObject")
 
         val jsonObjectPhotos = jsonObject?.get("photos")
-       // Log.d(TAG,"JsonObjectPhotos: $jsonObjectPhotos")
+        Log.d(TAG,"JsonObjectPhotos: $jsonObjectPhotos")
 
         val jsonObjectPhoto = jsonObjectPhotos?.asJsonObject?.get("photo")?.asJsonArray
-      //  Log.d(TAG,"JsonObjectPhoto: $jsonObjectPhoto")
+       Log.d(TAG,"JsonObjectPhoto: $jsonObjectPhoto")
 
         var listItems: List<GalleryItem> = mutableListOf()
 
@@ -35,7 +35,7 @@ class PhotoDeserializer : JsonDeserializer<PhotoResponse> {
 
                 val galleryItemId:String = jsonObjectPhoto[element].asJsonObject.get("id").toString()
                 val galleryItemUrl:String = jsonObjectPhoto[element].asJsonObject.get("url_s").toString().replace("\"","")
-               // Log.d(TAG,"galleryTitle[$element]: $galleryItemTitle, galleryId[$element]: $galleryItemId, galleryURL[$element]: $galleryItemUrl")
+                Log.d(TAG,"galleryTitle[$element]: $galleryItemTitle, galleryId[$element]: $galleryItemId, galleryURL[$element]: $galleryItemUrl")
                 listItems += GalleryItem(galleryItemTitle,galleryItemId,galleryItemUrl)
             }
 

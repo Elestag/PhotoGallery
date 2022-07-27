@@ -2,15 +2,16 @@ package com.bignerdranch.android.photogallery
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.system.Os.close
 import android.util.Log
 import androidx.annotation.WorkerThread
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.bignerdranch.android.photogallery.GalleryItem
-import com.bignerdranch.android.photogallery.PhotoDeserializer
 import com.bignerdranch.android.photogallery.api.FlickrApi
+import com.bignerdranch.android.photogallery.api.PhotoInterceptor
 import com.bignerdranch.android.photogallery.api.PhotoResponse
 import com.google.gson.GsonBuilder
+import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
@@ -27,18 +28,30 @@ class FlickrFetchr {
         val gson = GsonBuilder()
             .registerTypeAdapter(PhotoResponse::class.java, PhotoDeserializer())
             .create()
+
+        val client = OkHttpClient.Builder()
+            .addInterceptor(PhotoInterceptor())
+            .build()
+
         val retrofit: Retrofit = Retrofit.Builder()
             .baseUrl("https://api.flickr.com/")
             .addConverterFactory(GsonConverterFactory.create(gson))
+            .client(client)
             .build()
 
         flickrApi = retrofit.create(FlickrApi::class.java)
     }
 
     fun fetchPhotos(): LiveData<List<GalleryItem>> {
-        val responseLiveData: MutableLiveData<List<GalleryItem>> = MutableLiveData()
+        return fetchPhotoMetaData(flickrApi.fetchPhotos())
+    }
 
-        val flickrRequest: Call<PhotoResponse> = flickrApi.fetchPhotos()
+    fun searchPhotos(query: String): LiveData<List<GalleryItem>> {
+        return fetchPhotoMetaData(flickrApi.searchPhotos(query))
+    }
+
+    private fun fetchPhotoMetaData(flickrRequest: Call<PhotoResponse>): LiveData<List<GalleryItem>> {
+        val responseLiveData: MutableLiveData<List<GalleryItem>> = MutableLiveData()
 
         flickrRequest.enqueue(object : Callback<PhotoResponse> {
             override fun onResponse(
@@ -51,7 +64,8 @@ class FlickrFetchr {
                 var galleryItems: List<GalleryItem> = photoResponse?.galleryItems ?: mutableListOf()
                 galleryItems = galleryItems.filterNot { it.url.isBlank() }
 
-                // Log.d(TAG, "GallaryItems = $galleryItems")
+//                 Log.d(TAG, "responseBody = ${response.body()}")
+//                 Log.d(TAG, "galleryItem = $galleryItems")
 
                 responseLiveData.value = galleryItems
             }
@@ -67,11 +81,12 @@ class FlickrFetchr {
     fun fetchPhoto(url: String): Bitmap? {
 
         val response: Response<ResponseBody> = flickrApi.fetchUrlBytes(url).execute()
+
         val bitmap = response.body()?.byteStream()?.use(BitmapFactory::decodeStream)
 
-        Log.i(TAG, "Response.body=$response ")
+        Log.i(TAG, "url= $url")
 
-        Log.i(TAG, "Decoded bitmap=$bitmap from Response=${response.body()}")
+        Log.i(TAG, "Decoded bitmap=$bitmap from ResponseBody=${response.body()}")
 
         return bitmap
     }
