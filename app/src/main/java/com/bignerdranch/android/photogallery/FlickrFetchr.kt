@@ -60,6 +60,7 @@ class FlickrFetchr {
             ) {
                 // Log.d(TAG, "Response received")
                 val photoResponse: PhotoResponse? = response.body()
+
                 photoResponse?.galleryItems = response.body()?.galleryItems!!
                 var galleryItems: List<GalleryItem> = photoResponse?.galleryItems ?: mutableListOf()
                 galleryItems = galleryItems.filterNot { it.url.isBlank() }

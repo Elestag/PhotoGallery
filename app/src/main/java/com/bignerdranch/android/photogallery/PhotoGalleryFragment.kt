@@ -8,9 +8,11 @@ import android.os.Handler
 import android.util.Log
 import android.view.*
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.SearchView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.GridLayoutManager
@@ -23,6 +25,7 @@ class PhotoGalleryFragment : Fragment() {
     private lateinit var photoGalleryViewModel: PhotoGalleryViewModel
     private lateinit var photoRecyclerView: RecyclerView
     private lateinit var thumbnailDownloader: ThumbnailDownloader<PhotoHolder>
+    private lateinit var progressBar: ProgressBar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,6 +56,8 @@ class PhotoGalleryFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_photo_gallery, container, false)
 
         photoRecyclerView = view.findViewById(R.id.photo_recycler_view)
+        progressBar = view.findViewById(R.id.progress_bar)
+        progressBar.visibility = View.VISIBLE
         photoRecyclerView.layoutManager = GridLayoutManager(context, 3)
 
         return view
@@ -64,8 +69,18 @@ class PhotoGalleryFragment : Fragment() {
             viewLifecycleOwner,
             Observer { galleryItems ->
                 Log.d(TAG, "Have gallery items from view model $galleryItems")
+
+                checkProgressBar(galleryItems)
+
                 photoRecyclerView.adapter = PhotoAdapter(galleryItems)
+
             })
+    }
+
+    private fun checkProgressBar(list: List<GalleryItem>) {
+        if (list.size.compareTo(0) != 0)
+            progressBar.visibility = View.GONE
+
     }
 
     override fun onDestroyView() {
@@ -95,7 +110,15 @@ class PhotoGalleryFragment : Fragment() {
 
                 override fun onQueryTextSubmit(queryText: String): Boolean {
                     Log.d(TAG, "QueryTextSubmit: $queryText ")
+
                     photoGalleryViewModel.fetchPhotos(queryText)
+
+                    //hide search view and close keyboard
+                    searchView.clearFocus()
+                    searchView.setQuery("", false)
+                    searchView.isIconified = true
+
+
                     return true
                 }
 
@@ -107,6 +130,7 @@ class PhotoGalleryFragment : Fragment() {
 
             setOnClickListener {
                 searchView.setQuery(photoGalleryViewModel.searchTerm, false)
+
             }
         }
 
@@ -154,6 +178,8 @@ class PhotoGalleryFragment : Fragment() {
             holder.bindDrawable(placeholder)
             thumbnailDownloader.queueThumbnail(holder, galleryItem.url)
         }
+
+
     }
 
     companion object {
