@@ -52,7 +52,7 @@ class ThumbnailDownloader<in T : Any>(
     private lateinit var requestHandler: Handler
     private val requestMap = ConcurrentHashMap<T, String>()
     private val flickrFetchr = FlickrFetchr()
-    private val lruCache = LruCache<String, Bitmap>(50)
+    private val lruCache = LruCache<String, Bitmap>(100)
 
 
     @Suppress("UNCHECKED_CAST")
