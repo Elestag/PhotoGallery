@@ -2,7 +2,6 @@ package com.bignerdranch.android.photogallery
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.system.Os.close
 import android.util.Log
 import androidx.annotation.WorkerThread
 import androidx.lifecycle.LiveData
@@ -42,12 +41,20 @@ class FlickrFetchr {
         flickrApi = retrofit.create(FlickrApi::class.java)
     }
 
+    fun fetchPhotosRequest(): Call<PhotoResponse> {
+        return flickrApi.fetchPhotos()
+    }
+
     fun fetchPhotos(): LiveData<List<GalleryItem>> {
-        return fetchPhotoMetaData(flickrApi.fetchPhotos())
+        return fetchPhotoMetaData(fetchPhotosRequest())
+    }
+
+    fun searchPhotosRequest(query: String): Call<PhotoResponse> {
+        return flickrApi.searchPhotos(query)
     }
 
     fun searchPhotos(query: String): LiveData<List<GalleryItem>> {
-        return fetchPhotoMetaData(flickrApi.searchPhotos(query))
+        return fetchPhotoMetaData(searchPhotosRequest(query))
     }
 
     private fun fetchPhotoMetaData(flickrRequest: Call<PhotoResponse>): LiveData<List<GalleryItem>> {
