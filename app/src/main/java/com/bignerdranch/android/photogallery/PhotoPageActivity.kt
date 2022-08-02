@@ -5,10 +5,14 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.webkit.WebView
 import androidx.appcompat.app.AppCompatActivity
 
 private const val TAG = "PhotoPageActivity"
+
 class PhotoPageActivity : AppCompatActivity() {
+
+    private lateinit var webView: WebView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -17,6 +21,7 @@ class PhotoPageActivity : AppCompatActivity() {
 
         val fm = supportFragmentManager
         val currentFragment = fm.findFragmentById(R.id.fragment_container)
+
 
         Log.i(TAG, "current fragment : $currentFragment")
 
@@ -27,6 +32,16 @@ class PhotoPageActivity : AppCompatActivity() {
                     .add(R.id.fragment_container, fragment)
                     .commit()
             }
+        }
+    }
+
+    override fun onBackPressed() {
+        webView = findViewById(R.id.web_view)
+
+        if (webView.canGoBack()) {
+            webView.goBack()
+        } else {
+            super.onBackPressed()
         }
     }
 

@@ -45,8 +45,6 @@ class PhotoPageFragment : VisibleFragment() {
 
         Log.i(TAG, "current uri: $uri")
 
-
-
         webView.webChromeClient = object : WebChromeClient() {
 
             override fun onProgressChanged(webView: WebView, newProgress: Int) {
