@@ -89,7 +89,7 @@ class ThumbnailDownloader<in T : Any>(
 
     private fun handleRequest(target: T) {
         val url = requestMap[target] ?: return
-            //Log.i(TAG, "requestMap[target]: $url")
+        //Log.i(TAG, "requestMap[target]: $url")
         val bitmap: Bitmap
         if (lruCache.get(url) != null) {
             bitmap = lruCache.get(url)
@@ -99,7 +99,7 @@ class ThumbnailDownloader<in T : Any>(
             lruCache.put(url, bitmap)
         }
 
-        Log.i(TAG, "bitmap: $bitmap")
+        // Log.i(TAG, "bitmap: $bitmap")
 
         responseHandler.post(Runnable {
             if (requestMap[target] != url || hasQuit) {

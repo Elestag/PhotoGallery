@@ -19,31 +19,49 @@ class PhotoDeserializer : JsonDeserializer<PhotoResponse> {
 
         val jsonObject: JsonObject? = json?.asJsonObject
 
-        Log.d(TAG,"JsonObject: $jsonObject")
+        //Log.d(TAG, "JsonObject: $jsonObject")
 
         val jsonObjectPhotos = jsonObject?.get("photos")
-        Log.d(TAG,"JsonObjectPhotos: $jsonObjectPhotos")
+       // Log.d(TAG, "JsonObjectPhotos: $jsonObjectPhotos")
 
         val jsonObjectPhoto = jsonObjectPhotos?.asJsonObject?.get("photo")?.asJsonArray
-       Log.d(TAG,"JsonObjectPhoto: $jsonObjectPhoto")
+       // Log.d(TAG, "JsonObjectPhoto: $jsonObjectPhoto")
 
-        var listItems: List<GalleryItem> = mutableListOf()
+        val listItems: MutableList<GalleryItem> = mutableListOf()
+
+        var galleryItemTitle = ""
+        var galleryItemId = ""
+        var galleryItemUrl = ""
+        var galleryItemOwner = ""
 
         if (jsonObjectPhoto != null) {
-            for (element in 0 until jsonObjectPhoto.size()){
-                val galleryItemTitle:String = jsonObjectPhoto[element].asJsonObject.get("title").toString()
+            for (element in 0 until jsonObjectPhoto.size()) {
 
-                val galleryItemId:String = jsonObjectPhoto[element].asJsonObject.get("id").toString()
-                val galleryItemUrl:String = jsonObjectPhoto[element].asJsonObject.get("url_s").toString().replace("\"","")
-                Log.d(TAG,"galleryTitle[$element]: $galleryItemTitle, galleryId[$element]: $galleryItemId, galleryURL[$element]: $galleryItemUrl")
-                listItems += GalleryItem(galleryItemTitle,galleryItemId,galleryItemUrl)
+                galleryItemTitle =
+                    jsonObjectPhoto[element].asJsonObject.get("title").toString().replace("\"", "")
+                galleryItemId =
+                    jsonObjectPhoto[element].asJsonObject.get("id").toString().replace("\"", "")
+                galleryItemUrl =
+                    jsonObjectPhoto[element].asJsonObject.get("url_s").toString().replace("\"", "")
+                galleryItemOwner =
+                    jsonObjectPhoto[element].asJsonObject.get("owner").toString().replace("\"", "")
+
+//                Log.d(
+//                    TAG,
+//                    "galleryTitle[$element]: $galleryItemTitle, galleryId[$element]: $galleryItemId, galleryURL[$element]: $galleryItemUrl, galleryOwner[$galleryItemOwner]"
+//                )
+
+                listItems += GalleryItem(
+                    galleryItemTitle,
+                    galleryItemId,
+                    galleryItemUrl,
+                    galleryItemOwner
+                )
             }
 
 
         }
         val photoResponse = PhotoResponse()
-
-
         photoResponse.galleryItems = listItems
 
         return photoResponse
